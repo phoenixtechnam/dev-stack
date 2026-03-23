@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Editors
     nano vim \
     # CLI utilities
-    sudo jq htop tree tmux less file zip unzip \
+    sudo jq htop tree tmux less file zip unzip openssl wireguard-tools \
     rsync procps xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
