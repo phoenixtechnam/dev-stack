@@ -53,6 +53,13 @@ RUN npm install -g opencode-ai@latest
 # ── Composer (PHP package manager) ──────────────────────────────────
 RUN curl -fsSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# ── Playwright (E2E testing) ───────────────────────────────────────
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
+RUN npm install -g playwright && \
+    npx playwright install --with-deps chromium && \
+    chmod -R o+rx /opt/playwright-browsers && \
+    rm -rf /var/lib/apt/lists/*
+
 # ── Create non-root dev user with sudo ───────────────────────────────
 RUN useradd -m -s /bin/bash -G sudo dev && \
     echo "dev ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
