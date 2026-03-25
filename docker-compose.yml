@@ -33,6 +33,7 @@ services:
       # container's port 3000, which is forwarded here to the host.
       # Accessible at  http://<host-ip>:3000
       # Expand this range in .env if you need more ports.
+      - "${DIND_PORT:-1000}:2375"
       - "${PREVIEW_START:-2000}-${PREVIEW_END:-2020}:2000-2020"
     volumes:
       # Shared workspace — same path in both containers so that
