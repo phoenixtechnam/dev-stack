@@ -3,8 +3,6 @@
 .git
 home/*
 workspace/*
-dind-storage/*
 
 !home/.gitkeep
 !workspace/.gitkeep
-!dind-storage/.gitkeep

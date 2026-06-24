@@ -64,6 +64,18 @@ RUN npm install -g playwright && \
 RUN useradd -m -s /bin/bash -G sudo dev && \
     echo "dev ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
+# ── Dev-owned npm global prefix ──────────────────────────────────────
+# The CLIs above are installed system-wide (/usr/bin) on purpose: the
+# compose stack bind-mounts ./home over /home/dev, which would mask
+# anything baked into the dev home. But that leaves npm's global prefix
+# root-owned (/usr), so `dev` can't `npm i -g` at runtime and any global it
+# does install lands off PATH. Point the prefix at a dev-owned dir and put
+# it first on PATH. (Lives under the mounted home, so runtime-installed
+# globals persist across rebuilds.)
+ENV NPM_CONFIG_PREFIX=/home/dev/.npm-global
+ENV PATH=/home/dev/.npm-global/bin:$PATH
+RUN mkdir -p /home/dev/.npm-global/bin && chown -R dev:dev /home/dev/.npm-global
+
 # ── Workspace ────────────────────────────────────────────────────────
 RUN mkdir -p /workspace && chown dev:dev /workspace
 

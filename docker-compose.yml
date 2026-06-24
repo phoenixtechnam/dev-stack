@@ -28,20 +28,31 @@ services:
     container_name: dev-sandbox-dind
     privileged: true
     ports:
+      # The Docker daemon (2375) is intentionally NOT published to the host.
+      # The sandbox reaches it internally over sandbox-net via
+      # DOCKER_HOST=tcp://dind:2375. Publishing 2375 would expose an
+      # unauthenticated, root-equivalent API to your network.
+      # If you genuinely need host-side Docker CLI access, bind to loopback
+      # ONLY (still unauthenticated — never bind to 0.0.0.0):
+      #   - "127.0.0.1:${DIND_PORT:-1000}:2375"
+      #
       # Preview port range — when you run  docker run -p 3000:3000 myapp
       # from the sandbox terminal, the container binds to the DinD
       # container's port 3000, which is forwarded here to the host.
       # Accessible at  http://<host-ip>:3000
       # Expand this range in .env if you need more ports.
-      - "${DIND_PORT:-1000}:2375"
       - "${PREVIEW_START:-2000}-${PREVIEW_END:-2020}:2000-2020"
     volumes:
       # Shared workspace — same path in both containers so that
       # docker build contexts and volume mounts (-v /workspace/...)
       # work correctly from the sandbox terminal.
       - "./workspace:/workspace"
-      # Persistent Docker data (images, layers, build cache)
-      - "./dind-storage:/var/lib/docker"
+      # Persistent Docker data (images, layers, build cache).
+      # MUST be a real local filesystem path — on Unraid, a cache pool under
+      # /mnt/<pool>/... Do NOT point DIND_STORAGE at a FUSE user share
+      # (/mnt/user/...) or a network mount: overlay2 can't initialize and
+      # containerd's metadata DB hangs there, crash-looping the daemon.
+      - "${DIND_STORAGE:-/mnt/ssd_cache_nvme/appdata/dev-sandbox/dind}:/var/lib/docker"
     environment:
       # Disable TLS — communication is internal on sandbox-net only
       - DOCKER_TLS_CERTDIR=
